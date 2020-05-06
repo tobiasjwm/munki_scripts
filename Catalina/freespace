@@ -1,0 +1,28 @@
+validate_free_space() {
+    local installerMajor diskInfoPlist freeSpace requiredDiskSpaceSizeGB installerPath installerSizeBytes
+
+    installerMajor="$1"
+    installerPath="$2"
+
+    diskInfoPlist=$(/usr/sbin/diskutil info -plist /)
+    ## 10.13.4 or later, diskutil info command output changes key from 'AvailableSpace' to 'Free Space' about disk space.
+    ## 10.15.0 or later, diskutil info command output changes key from 'APFSContainerFree' to 'Free Space' about disk space.
+    freeSpace=$(
+    /usr/libexec/PlistBuddy -c "Print :APFSContainerFree" /dev/stdin <<< "$diskInfoPlist" 2>/dev/null || /usr/libexec/PlistBuddy -c "Print :FreeSpace" /dev/stdin <<< "$diskInfoPlist" 2>/dev/null || /usr/libexec/PlistBuddy -c "Print :AvailableSpace" /dev/stdin <<< "$diskInfoPlist" 2>/dev/null
+    )
+
+    ## The free space calculation also includes the installer, so it is excluded.
+    if [ -e "$installerPath" ]; then
+        installerSizeBytes=$(/usr/bin/du -s "$installerPath" | /usr/bin/awk '{print $1}' | /usr/bin/xargs)
+        freeSpace=$((freeSpace + installerSizeBytes))
+    fi
+
+    ## Check if free space > 15GB (install 10.13) or 20GB (install 10.14+)
+    requiredDiskSpaceSizeGB=$([ "$installerMajor" -ge 14 ] && /bin/echo "20" || /bin/echo "15")
+    if [[ ${freeSpace%.*} -ge $(( requiredDiskSpaceSizeGB * 1000 * 1000 * 1000 )) ]]; then
+        /bin/echo "Disk Check: OK - ${freeSpace%.*} Bytes Free Space Detected"
+    else
+        sysRequirementErrors+=("Has at least ${requiredDiskSpaceSizeGB}GB of Free Space")
+        /bin/echo "Disk Check: ERROR - ${freeSpace%.*} Bytes Free Space Detected"
+    fi
+}

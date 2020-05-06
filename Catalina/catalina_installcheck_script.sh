@@ -21,7 +21,7 @@
 #
 #Check that we're not already running Catalina (as a backup the pkgsinfo logic)
 minorVers=$(sw_vers -productVersion | awk -F '.' '{print $2}')
-if [ $minorVers -ge 15 ]; then
+if [ "$minorVers" -ge 15 ]; then
   echo "OS Upgrade Failed: Already running 10.15 or newer"
   exit 1
 fi
@@ -64,7 +64,7 @@ if [ -z "$vmCheck" ]; then
 fi
 #### Required memory check
 installedRAM=$(/usr/sbin/sysctl -n hw.memsize)
-if [ $installedRAM -lt 4294967296 ]; then
+if [ "$installedRAM" -lt 4294967296 ]; then
   echo "OS Upgrade Failed: Insufficient RAM"
   exit 1
 fi
@@ -88,12 +88,12 @@ if (( "$minorVers" != 6 )); then
 fi
 #### Free space check
 diskutil_plist="$(mktemp -t "diskutil").plist"
-diskutil info -plist / > ${diskutil_plist}
+diskutil info -plist / > "${diskutil_plist}"
 freespace=$(defaults read "${diskutil_plist}" FreeSpace)
 rm "${diskutil_plist}"
-freespace=$(expr $freespace / $((1024**2)))
-if (( ${freespace} < 18944 )); then
-	echo "OS Upgrade Failed: Less than 18.5GB free space"
+freespace=$(expr "$freespace" / $((1024**2)))
+if (( ${freespace} < 12800 )); then
+	echo "OS Upgrade Failed: Less than 12.5GB free space"
 	exit 1
 fi
 exit 0
