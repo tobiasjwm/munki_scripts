@@ -6,7 +6,7 @@
 # another day.
 
 # REPLACE with current installer version
-installerVersion="10.4.0.51"
+installerVersion="10.6.1.150"
 
 # This will check Carbonite's odd versioning scheme.
 carboniteVersion=$(grep  ClientVersion "/Library/Application Support/DCProtect/Service/LocalServiceSettings.config.xml" | tr -d '\t' | sed 's/^<.*>\([^<].*\)<.*>$/\1/' | cut -f2 -d ">" | cut -f1 -d "<")
