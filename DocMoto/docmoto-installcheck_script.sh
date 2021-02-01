@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Get current version of installed Brief Encounter.app
+# Get current version of installed DocMoto.app
 version="$(/usr/libexec/plistbuddy -c Print:CFBundleShortVersionString: '/Applications/DocMotoClient.app/Contents/Info.plist' 2>/dev/null)"
 
 # Compare with the version we want to install
